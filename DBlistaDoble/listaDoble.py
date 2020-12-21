@@ -1,8 +1,10 @@
-from graphviz import Digraph
-
+#TODOS LOS METODOS FUNCIONAN PERFECTAMENTE, LISTA PARA SUBIR AL PROYECTO
+import os
 class Nodo:
-    def __init__(self, str):
-        self.str = str
+    def __init__(self, nombreBase):
+        self.nombreBase = nombreBase
+        self.tablas = None
+        self.ldArbol = None
         self.siguiente = None
         self.anterior = None
         self.abajo = None
@@ -20,17 +22,16 @@ class ListaDOBLE:
             return False
 
     #Método agregar MÉTODO FUNCIONAL PARA ENVIAR
-    def agregarLista(self, str):
-        nuevoNodo = Nodo(str)
-        #if type(str) != int:
+    def agregarLista(self, nombreBase):
+        nuevoNodo = Nodo(nombreBase)
         try:
-            if type(str) != int:
+            if type(nombreBase) != int:
                 if self.listaVacia() is True:
                     self.primero = nuevoNodo
                     self.ultimo = nuevoNodo
                     return 0
                 else:
-                    if self.buscarNodo(str) == 0:
+                    if self.buscarNodo(nombreBase) == 0:
                         if self.primero != None:
                             self.ultimo.siguiente = nuevoNodo
                             nuevoNodo.anterior = self.ultimo
@@ -39,7 +40,7 @@ class ListaDOBLE:
                             self.primero = nuevoNodo
                             self.ultimo = nuevoNodo
                         return 0
-                    elif self.buscarNodo(str) == 2:
+                    elif self.buscarModificar(nombreBase) == 2:
                         return 2
                     else:
                         return 1
@@ -48,20 +49,34 @@ class ListaDOBLE:
         except:
             return 1
 
-    #Método Buscar
+    #Método Buscar Util
     def buscarNodo(self, dato):
         actual = self.primero
         encontrado = False
         if self.primero != None:
             while actual != None and encontrado != True:
-                if actual.str == dato:
+                if actual.nombreBase == dato:
+                    encontrado = True
+                    return actual
+                actual = actual.siguiente
+            if not encontrado:
+                return 0
+        else:    
+            return 1  
+
+    def buscarModificar(self, dato):
+        actual = self.primero
+        encontrado = False
+        if self.primero != None:
+            while actual != None and encontrado != True:
+                if actual.nombreBase == dato:
                     encontrado = True
                     return 2
                 actual = actual.siguiente
             if not encontrado:
                 return 0
-        else:
-            return 1     
+        else:    
+            return 1   
 
     #Método Eliminar MÉTODO FUNCIONAL PARA ENVIAR
     def eliminarNodo(self, dato):
@@ -74,7 +89,7 @@ class ListaDOBLE:
             else:
                 if self.primero != None:
                     while aux != None and encontrado != True:
-                        if aux.str == dato:
+                        if aux.nombreBase == dato:
                             if aux == self.primero:
                                 self.primero = self.primero.siguiente
                             elif aux == self.ultimo:
@@ -93,24 +108,23 @@ class ListaDOBLE:
             return 1
 
     #Método Modificar MÉTODO FUNCIONAL PARA ENVIAR
-    def modificarNodo(self, str, dato):
+    def modificarNodo(self, nombreActual, nuevoNombre):
         try:
-            if self.buscarNodo(dato) == 2:
-
+            if self.buscarModificar(nuevoNombre) == 2:
                 return 3
             else:
                 actual = self.primero
                 encontrado = False
                 if self.primero != None:
                     while actual != None and encontrado != True:
-                        if actual.str == str:
+                        if actual.nombreBase == nombreActual:
                             encontrado = True
-                            actual.str = dato
+                            actual.nombreBase = nuevoNombre
                             return 0
                         actual = actual.siguiente
                     if not encontrado:
                         return 2
-                else:   
+                else:     
                     return 1
         except:
             return 1
@@ -120,47 +134,31 @@ class ListaDOBLE:
         lista = []
         tmp = self.primero
         while tmp != None:
-            lista.append(tmp.str)
+            lista.append(tmp.nombreBase)
             tmp = tmp.siguiente
         return lista
 
-    #Método Graficar
-    def graficar(self, nombre):
-        cadena = ""
-        cadena2 = ""
-        cadena1 = ""
-        cadena3 = ""
-        cadena4 = ""
-        g = Digraph('g', 
-            node_attr={'shape': 'record', 'style':'rounded,filled','fillcolor': 'orange:red'})
-        g.attr(rankdir='LR')
-        g.format = 'png'
-        #aquí va todo el codigo que recorre la lista
-        #1er while crea los nodos a graficar
-        aux = self.primero
-        while aux != None:
-            cadena = cadena + aux.str
-            g.node(cadena,cadena)
-            cadena = ""
-            aux = aux.siguiente
-        #2do while crea los apuntadores siguientes entre nodos 
+
+
+     
+    def GraficarConArchivo(self):
+        f = open("listaDoble.dot", "w")
+        f.write("digraph g {\n")
+        f.write("node [shape = rect, width=1, height=0.4];\n")     
+        f.write("rankdir=LR;\n")
+
         tmp = self.primero
         while tmp.siguiente != None:
-            cadena2 = cadena2 + tmp.str
-            cadena1 = cadena1 + tmp.siguiente.str
-            g.edge(cadena2, cadena1)
-            cadena1 = ""
-            cadena2 = ""
+            f.write("\""+str(tmp.nombreBase)+"\"->"+"\""+str(tmp.siguiente.nombreBase)+"\";\n")
             tmp = tmp.siguiente
-        #3er while crea los apuntadores anteriores entre nodos
-        tmp = self.ultimo
-        while tmp.anterior != None:
-            cadena3 = cadena3 + tmp.str
-            cadena4 = cadena4 + tmp.anterior.str
-            g.edge(cadena3, cadena4)
-            cadena3 = ""
-            cadena4 = ""
-            tmp = tmp.anterior
-        #genera el archivo .Dot y una imagen png
-        g.render(nombre+'.gv.png', view=True)
-        #g.view() metodo de graphviz para generar pdf con la imagen
+        aux = self.ultimo
+        while aux.anterior != None:
+            f.write("\""+str(aux.nombreBase)+"\"->"+"\""+str(aux.anterior.nombreBase)+"\";\n")
+            aux = aux.anterior
+        f.write("}")
+        f.close()
+        os.system("dot -Tjpg listaDoble.dot -o listaDoble.png")
+
+
+
+    
