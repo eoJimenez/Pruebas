@@ -18,5 +18,6 @@ drop = dropDatabase('db4')
 print(drop)
 imp = showDatabases()
 print(imp)
+graf = grafica()
 
 

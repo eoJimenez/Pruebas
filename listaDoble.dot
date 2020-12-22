@@ -1,0 +1,6 @@
+digraph g {
+node [shape = rect, width=1, height=0.4];
+rankdir=LR;
+"db1"->"db2";
+"db2"->"db1";
+}
